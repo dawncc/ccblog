@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>JAVA线程</title>
+  <meta name="description" content="1 JAVA线程: 创建与启动###1.1 继承java.lang.Thread类java.lang.Object  |-- java.lang.Thread创建线程：``` java class PrimeThread extends Thread {         long minPrime;       ...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://yourdomain.com/JAVA线程/">
+  <link rel="alternate" type="application/rss+xml" title="Your awesome title" href="http://yourdomain.com/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Your awesome title</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">JAVA线程</h1>
+  </header>
+
+  <div class="post-content">
+    <h2 id="java-">1 JAVA线程: 创建与启动</h2>
+<p>###1.1 继承java.lang.Thread类
+<code class="highlighter-rouge">
+java.lang.Object
+  |-- java.lang.Thread
+</code>
+创建线程：
+``` java
+ class PrimeThread extends Thread {
+         long minPrime;
+         PrimeThread(long minPrime) {
+             this.minPrime = minPrime;
+         }</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>     public void run() {
+         // compute primes larger than minPrime
+          . . .
+     }
+ }
+</code></pre>
+</div>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>启用线程
+``` java
+PrimeThread p = new PrimeThread(143);
+     p.start();
+</code></pre>
+</div>
+<p>###1.2 实现java.lang.Runnable接口。
+*方法摘要 *
+<code class="highlighter-rouge">
+ void run() 
+          使用实现接口 Runnable 的对象创建一个线程时，启动该线程将导致在独立执行的线程中调用对象的 run 方法。 
+</code>
+创建线程：
+```java
+class PrimeRun implements Runnable {
+         long minPrime;
+         PrimeRun(long minPrime) {
+             this.minPrime = minPrime;
+         }</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>     public void run() {
+         // compute primes larger than minPrime
+          . . .
+     }
+ } ``` 使用线程 ``` java PrimeRun p = new PrimeRun(143);
+ new Thread(p).start(); ```
+</code></pre>
+</div>
+
+<h2 id="section">2. 线程状态</h2>
+<p>java.lang 
+枚举 Thread.State
+java.lang.Object
+  |– java.lang.Enum<Thread.State></Thread.State></p>
+
+<h3 id="section-1">2.1 枚举常量摘要</h3>
+<p>BLOCKED<br />
+          受阻塞并且正在等待监视器锁的某一线程的线程状态。 
+NEW 
+          至今尚未启动的线程的状态。 
+RUNNABLE 
+          可运行线程的线程状态。 
+TERMINATED 
+          已终止线程的线程状态。 
+TIMED_WAITING 
+          具有指定等待时间的某一等待线程的线程状态。 
+WAITING 
+          某一等待线程的线程状态。 
+### 2.2 状态转换
+<img src="https://raw.githubusercontent.com/cc2chblog/keepblog/master/images/%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81%E5%9B%BE.jpg" alt="线程状态如图" /></p>
+
+<h2 id="section-2">3. 终止线程</h2>
+<p>###3.1 Thread.stop()<strong><em>（废弃方法）</em></strong>
+Thread.stop()方法在结束线程时，会直接终止线程，并且会立即释放这个线程所有的锁。
+&gt;<strong>结果：</strong>导致数据不一致</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">cc</span><span class="o">.</span><span class="na">training</span><span class="o">.</span><span class="na">thread</span><span class="o">;</span>
+
+<span class="cm">/**
+ * 用于测试使用Thread.stop()方法终止线程导致的数据不一致问题
+ * 
+ * @author cc
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">StopThreadUnsafeTest</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 定义共享的user用于全局调用，下面两个测试线程都可以使用当前user
+	 */</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="n">User</span> <span class="n">user</span> <span class="o">=</span> <span class="k">new</span> <span class="n">User</span><span class="o">();</span>
+
+	<span class="cm">/**
+	 * 声明一个user，包括uername和id 两个线程同时操作更新这个user的数据
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+		<span class="kd">private</span> <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
+		<span class="kd">private</span> <span class="n">String</span> <span class="n">username</span><span class="o">;</span>
+
+		<span class="kd">public</span> <span class="n">User</span><span class="o">()</span> <span class="o">{</span>
+			<span class="n">setId</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+			<span class="n">setUsername</span><span class="o">(</span><span class="s">"0"</span><span class="o">);</span>
+		<span class="o">}</span>
+
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="n">String</span> <span class="n">toString</span><span class="o">()</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated method stub</span>
+			<span class="k">return</span> <span class="s">"User {id="</span> <span class="o">+</span> <span class="n">getId</span><span class="o">()</span> <span class="o">+</span> <span class="s">", username="</span> <span class="o">+</span> <span class="n">getUsername</span><span class="o">()</span> <span class="o">+</span> <span class="s">"}"</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="kd">public</span> <span class="kt">int</span> <span class="n">getId</span><span class="o">()</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="n">id</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="kd">public</span> <span class="kt">void</span> <span class="n">setId</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="kd">public</span> <span class="n">String</span> <span class="n">getUsername</span><span class="o">()</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="n">username</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="kd">public</span> <span class="kt">void</span> <span class="n">setUsername</span><span class="o">(</span><span class="n">String</span> <span class="n">username</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">this</span><span class="o">.</span><span class="na">username</span> <span class="o">=</span> <span class="n">username</span><span class="o">;</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+	<span class="cm">/**
+	 * 使用extends Thread的模式创建一个线程 该线程用于设置user的属性
+	 * 
+	 * @author cc
+	 *
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">ChangeObjectThread</span> <span class="kd">extends</span> <span class="n">Thread</span> <span class="o">{</span>
+
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="kt">void</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated method stub</span>
+			
+			<span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+				<span class="kd">synchronized</span> <span class="o">(</span><span class="n">user</span><span class="o">)</span> <span class="o">{</span>
+					<span class="c1">//在当前进程中使用同一变量，分别赋值给id和user 以用于检查数据不一致性</span>
+					<span class="kt">int</span> <span class="n">v</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">/</span> <span class="mi">1000</span><span class="o">);</span>
+					<span class="n">user</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="n">v</span><span class="o">);</span>
+					<span class="k">try</span> <span class="o">{</span>
+						<span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+					<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+						<span class="c1">// TODO Auto-generated catch block</span>
+						<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+					<span class="o">}</span>
+					<span class="n">user</span><span class="o">.</span><span class="na">setUsername</span><span class="o">(</span><span class="n">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">v</span><span class="o">));</span>
+				<span class="o">}</span>
+				<span class="c1">// 暂停当前正在执行的线程对象，并执行其他线程。</span>
+				<span class="n">Thread</span><span class="o">.</span><span class="na">yield</span><span class="o">();</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	
+	<span class="cm">/**
+	 * 使用extends Thread的模式创建另一个线程 该线程用于读取user的属性
+	 * @author cc
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">ReadObjectThread</span> <span class="kd">extends</span> <span class="n">Thread</span> <span class="o">{</span>
+		<span class="cm">/**
+		 * 当user下的id和name不一致的时候，读出user
+		 */</span>
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="kt">void</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
+			<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Read Thread Start!"</span><span class="o">);</span>
+			<span class="c1">// TODO Auto-generated method stub</span>
+			<span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+				<span class="kd">synchronized</span> <span class="o">(</span><span class="n">user</span><span class="o">)</span> <span class="o">{</span>
+					<span class="k">if</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">!=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getUsername</span><span class="o">())){</span>
+						<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+					<span class="o">}</span>
+			<span class="o">}</span>
+			<span class="c1">// 暂停当前正在执行的线程对象，并执行其他线程。</span>
+			<span class="n">Thread</span><span class="o">.</span><span class="na">yield</span><span class="o">();</span>
+		<span class="o">}</span>
+	  <span class="o">}</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="n">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+		<span class="k">new</span> <span class="n">ReadObjectThread</span><span class="o">().</span><span class="na">start</span><span class="o">();</span>
+		<span class="c1">//每隔1.5秒，启动一个changeOjectThread的线程</span>
+		<span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+			<span class="n">Thread</span> <span class="n">t</span>  <span class="o">=</span> <span class="k">new</span> <span class="n">ChangeObjectThread</span><span class="o">();</span>
+			<span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+			<span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1500</span><span class="o">);</span>
+			<span class="n">t</span><span class="o">.</span><span class="na">stop</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre>
+</div>
+<p><strong>执行结果：</strong></p>
+
+<p><img src="https://raw.githubusercontent.com/cc2chblog/keepblog/master/images/image.jpg" alt="线程数据不一致结果图" /></p>
+
+<p>###3.2 正确终止线程
+&gt; 使用标志位，让线程自行结束</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">cc</span><span class="o">.</span><span class="na">training</span><span class="o">.</span><span class="na">thread</span><span class="o">;</span>
+
+
+<span class="cm">/**
+ * 使用标志位来正确终止线程
+ * 
+ * @author cc
+ *
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">StopTheadSafeTest</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 定义共享的user用于全局调用，下面两个测试线程都可以使用当前user
+	 */</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="n">User</span> <span class="n">user</span> <span class="o">=</span> <span class="k">new</span> <span class="n">User</span><span class="o">();</span>
+
+	<span class="cm">/**
+	 * 声明一个user，包括uername和id 两个线程同时操作更新这个user的数据
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">User</span> <span class="o">{</span>
+		<span class="kd">private</span> <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
+		<span class="kd">private</span> <span class="n">String</span> <span class="n">username</span><span class="o">;</span>
+
+		<span class="kd">public</span> <span class="n">User</span><span class="o">()</span> <span class="o">{</span>
+			<span class="n">setId</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+			<span class="n">setUsername</span><span class="o">(</span><span class="s">"0"</span><span class="o">);</span>
+		<span class="o">}</span>
+
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="n">String</span> <span class="n">toString</span><span class="o">()</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated method stub</span>
+			<span class="k">return</span> <span class="s">"User {id="</span> <span class="o">+</span> <span class="n">getId</span><span class="o">()</span> <span class="o">+</span> <span class="s">", username="</span> <span class="o">+</span> <span class="n">getUsername</span><span class="o">()</span> <span class="o">+</span> <span class="s">"}"</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="kd">public</span> <span class="kt">int</span> <span class="n">getId</span><span class="o">()</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="n">id</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="kd">public</span> <span class="kt">void</span> <span class="n">setId</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="kd">public</span> <span class="n">String</span> <span class="n">getUsername</span><span class="o">()</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="n">username</span><span class="o">;</span>
+		<span class="o">}</span>
+
+		<span class="kd">public</span> <span class="kt">void</span> <span class="n">setUsername</span><span class="o">(</span><span class="n">String</span> <span class="n">username</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">this</span><span class="o">.</span><span class="na">username</span> <span class="o">=</span> <span class="n">username</span><span class="o">;</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+	<span class="cm">/**
+	 * 使用extends Thread的模式创建一个线程 该线程用于设置user的属性
+	 * 
+	 * @author cc
+	 *
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">ChangeObjectThread</span> <span class="kd">extends</span> <span class="n">Thread</span> <span class="o">{</span>
+		<span class="c1">// 线程终止标志位</span>
+		<span class="kd">volatile</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="n">stopFlag</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+		<span class="cm">/**
+		 * 提供给外部调用，用于终止线程
+		 */</span>
+		<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="n">stopThread</span><span class="o">(){</span>
+			<span class="n">stopFlag</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="kt">void</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
+			<span class="c1">// TODO Auto-generated method stub</span>
+			
+			<span class="k">while</span> <span class="o">(!</span><span class="n">stopFlag</span><span class="o">)</span> <span class="o">{</span>
+				<span class="kd">synchronized</span> <span class="o">(</span><span class="n">user</span><span class="o">)</span> <span class="o">{</span>
+					<span class="c1">//在当前进程中使用同一变量，分别赋值给id和user 以用于检查数据不一致性</span>
+					<span class="kt">int</span> <span class="n">v</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">/</span> <span class="mi">1000</span><span class="o">);</span>
+					<span class="n">user</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="n">v</span><span class="o">);</span>
+					<span class="k">try</span> <span class="o">{</span>
+						<span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+					<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+						<span class="c1">// TODO Auto-generated catch block</span>
+						<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+					<span class="o">}</span>
+					<span class="n">user</span><span class="o">.</span><span class="na">setUsername</span><span class="o">(</span><span class="n">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">v</span><span class="o">));</span>
+				<span class="o">}</span>
+				<span class="c1">// 暂停当前正在执行的线程对象，并执行其他线程。</span>
+				<span class="n">Thread</span><span class="o">.</span><span class="na">yield</span><span class="o">();</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+	
+	<span class="cm">/**
+	 * 使用extends Thread的模式创建另一个线程 该线程用于读取user的属性
+	 * @author cc
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">ReadObjectThread</span> <span class="kd">extends</span> <span class="n">Thread</span> <span class="o">{</span>
+		<span class="cm">/**
+		 * 当user下的id和name不一致的时候，读出user
+		 */</span>
+		<span class="nd">@Override</span>
+		<span class="kd">public</span> <span class="kt">void</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
+			<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Read Thread Start!"</span><span class="o">);</span>
+			<span class="c1">// TODO Auto-generated method stub</span>
+			<span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+				<span class="kd">synchronized</span> <span class="o">(</span><span class="n">user</span><span class="o">)</span> <span class="o">{</span>
+					<span class="k">if</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">()</span> <span class="o">!=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getUsername</span><span class="o">())){</span>
+						<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+					<span class="o">}</span>
+			<span class="o">}</span>
+			<span class="c1">// 暂停当前正在执行的线程对象，并执行其他线程。</span>
+			<span class="n">Thread</span><span class="o">.</span><span class="na">yield</span><span class="o">();</span>
+		<span class="o">}</span>
+	  <span class="o">}</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="n">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+		<span class="k">new</span> <span class="n">ReadObjectThread</span><span class="o">().</span><span class="na">start</span><span class="o">();</span>
+		<span class="c1">//每隔1.5秒，启动一个changeOjectThread的线程</span>
+		<span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+			<span class="n">Thread</span> <span class="n">t</span>  <span class="o">=</span> <span class="k">new</span> <span class="n">ChangeObjectThread</span><span class="o">();</span>
+			<span class="n">t</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+			<span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1500</span><span class="o">);</span>
+			<span class="o">((</span><span class="n">ChangeObjectThread</span><span class="o">)</span> <span class="n">t</span><span class="o">).</span><span class="na">stopThread</span><span class="o">();</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre>
+</div>
+<p>## 4. 线程中断
+&gt;public void interrupt()   //中断线程
+&gt;public boolean isInterrupted() //测试当前线程是否已经中断
+&gt;public static boolean interrupted()//测试当前线程是否已经中断，并清除线程的中断状态。</p>
+
+<p>interrupt()方法通知目标线程进行中断，但是并不能直接起到类似stop()的直接中断的作用，它提供了一个中断线程的标志位，然后配合isInterruped的判断才能中断线程。
+<strong>以下示例是无法中断线程的</strong>
+```java
+package com.cc.training.thread;</p>
+
+<p>/**	
+ * 线程中断的示例
+ * @author cc
+ *
+ */
+public class InterruptThreadTest {</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>/**
+ * 直接使用Interrupt方法是无法中断线程的
+ * 它提供了一个中断线程的标志位，然后配合isInterruped的判断才能中断线程。
+ * @param args
+ * @throws InterruptedException 
+ */
+public static void main(String[] args) throws InterruptedException {
+	// TODO Auto-generated method stub
+	Thread t = new Thread(){
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			while(true){
+				Thread.yield();
+			}
+		}
+	};
+	t.start();
+	Thread.sleep(2000);
+	t.interrupt();
+} } ```
+</code></pre>
+</div>
+
+<p><strong>正确中断线程的示例</strong>
+```java
+package com.cc.training.thread;</p>
+
+<p>/**
+ * 线程中断的示例
+ * 
+ * @author cc
+ *
+ */
+public class InterruptThreadTest {</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>/**
+ * 直接使用Interrupt方法是无法中断线程的 它提供了一个中断线程的标志位，然后配合isInterruped的判断才能中断线程。
+ * 
+ * @param args
+ * @throws InterruptedException
+ */
+public static void main(String[] args) throws InterruptedException {
+	// TODO Auto-generated method stub
+	Thread t = new Thread() {
+		@Override
+		public void run() {
+			while (true) {
+				// 使用isInterrupted()方法，判断中断线程的标志位来起到中断线程的作用
+				if (Thread.currentThread().isInterrupted()) {
+					System.out.println("Interrupted");
+					break;
+				}
+				Thread.yield();
+			}
+		}
+	};
+	t.start();
+	Thread.sleep(2000);
+	t.interrupt();
+}
+</code></pre>
+</div>
+
+<p>}</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>## 等待（wait）和通知（notify）
+&gt; public final void wait() throws InterruptedException //在其他线程调用此对象的 notify() 方法或 notifyAll() 方法前，导致当前线程等待
+&gt; public final void notify() //唤醒在此对象监视器上等待的单个线程。
+
+如果一个线程A调用obj.wait()方法，这个线程A就会被放置到等待队列中。
+线程A会一直等待到其他线程调用了obj.notify()为止。
+&lt;img src="D:\04-make_it_done\01-blog\keepblog\images\notify唤醒等待的线程.png" width="481" height="564" border="0" alt=""&gt;
+
+Object.wait()方法必须包含在对于的synchronzied语句块中，无论是wait()或者notify()都需要首先获取目标对象的一个监视器。
+&lt;img src="D:\04-make_it_done\01-blog\keepblog\images\wait()和notify()的工作流程细节.png" width="460" height="560" border="0" alt=""&gt;
+
+代码示例如下：
+```java
+package com.cc.training.thread;
+
+/**
+ * 一个简单的使用Wait方法和Notify方法的样例
+ * @author cc
+ *
+ */
+public class WaitAndNotifyThreadTest {
+	/**
+	 * 多线程操作的共享资源
+	 */
+	final static Object obj = new Object();
+	
+	/**
+	 * 定义一个线程，用于执行wait方法进行等待
+	 * 直到其他线程调用notify方法唤醒
+	 * @author cc
+	 *
+	 */
+	public static class T1 extends Thread{
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			synchronized (obj) {
+				System.out.println("T1 start!");
+				System.out.println("T1 wait for object");
+				try {
+					obj.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("T1 End!");
+			}
+		}
+	}
+	
+	/**
+	 * 定义一个线程，用于执行notify方法去唤醒其他线程
+	 * @author cc
+	 *
+	 */
+	public static class T2 extends Thread{
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			synchronized (obj) {
+				System.out.println("T2 start! notify one thread");
+				obj.notify();
+				System.out.println("T2 End!");
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public static void main(String[] args) {
+		Thread t1 = new T1();
+		Thread t2 = new T2();
+		t1.start();
+		t2.start();
+	}
+}
+</code></pre>
+</div>
+<p>执行结果如下：
+&gt;T1 start!
+T1 wait for object
+T2 start! notify one thread
+T2 End!
+T1 End!</p>
+
+<blockquote>
+  <p><strong>Object.wait()和Thread.sleep()方法都可以让线程等待若干时间，除了wait可以被唤醒外，另外一个重要的区别就是wait方法会释放所有的对象的锁，而sleep方法不会释放任何资源</strong></p>
+</blockquote>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Your awesome title</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>Your awesome title</li>
+          <li><a href="mailto:your-email@domain.com">your-email@domain.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/jekyll"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">jekyll</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/jekyllrb"><span class="icon icon--twitter"><svg viewBox="0 0 16 16"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">jekyllrb</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
